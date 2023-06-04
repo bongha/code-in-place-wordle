@@ -1,0 +1,105 @@
+from graphics import Canvas
+import random
+
+CANVAS_WIDTH = 370
+CANVAS_HEIGHT = 440
+SQUARE_LEN = 60
+
+def main():
+    winning = False
+    canvas = Canvas(CANVAS_WIDTH, CANVAS_HEIGHT)
+    word_list = create_word_list()
+    answer = 'brave'      #word_list[random.randint(0, 14850)]
+    map = define_map()
+    #print(map)
+    paint_canvas(canvas)
+    print('Welcome to Yang\'s wordle.')
+    for i in range(6):
+        user_input = str(input("Enter a five lettter word:"))
+        user_input = check_word_list(user_input, word_list)
+        check_answer(map, answer, user_input, i)
+        #print(map)
+        update_canvas(canvas, map, user_input, i)
+        if check_winnning(map, i):
+            winning = True
+            print('You won!')
+            break
+    if winning == False:
+        print('Sorry, you used all six tries. The answer is \'', answer, '\'')    
+
+def update_canvas(canvas, map, user_input, i):
+    square_start_x = 15
+    square_start_y = 15 + i * (SQUARE_LEN + 10)
+    for j in range(5):
+        color = color_picker(map, i, j)
+        canvas.create_rectangle(square_start_x, square_start_y, square_start_x + SQUARE_LEN, square_start_y + SQUARE_LEN, color)
+        canvas.create_text(square_start_x+30,square_start_y+30,font='helvetica',font_size=42,text=user_input[j],color='white',anchor='center')
+        square_start_x += 70
+
+def color_picker(map, i, j):
+    if map[i][j] == 1:
+        return 'grey'
+    elif map[i][j] == 2:
+        return 'gold'
+    elif map[i][j] == 3:
+        return 'forestgreen'
+  
+def paint_canvas(canvas):
+    row_start_x = 15
+    row_start_y = 15
+    for i in range(6):
+        draw_row(canvas, row_start_x, row_start_y, 'gainsboro')
+        row_start_y += 70
+
+def draw_row(canvas, row_start_x, row_start_y, color):
+    square_start_x = row_start_x
+    square_start_y = row_start_y
+    for i in range(5):
+        canvas.create_rectangle(square_start_x, square_start_y, square_start_x + SQUARE_LEN, square_start_y + SQUARE_LEN, color)
+        square_start_x += 70
+
+def check_winnning(map, i):
+    sum = 0
+    for j in range(5):
+        sum += int(map[i][j])
+    if sum == 15:
+        return True
+
+def check_answer(map, answer, user_input, i):
+    for j in range(5):
+        if user_input[j] == answer[j]:
+            map[i][j] = 3
+        elif user_input[j] in answer:
+            map[i][j] = 2
+        else:
+            map[i][j] = 1
+    return map
+
+def define_map():
+    row_0 = [0, 0, 0, 0, 0]
+    row_1 = [0, 0, 0, 0, 0]
+    row_2 = [0, 0, 0, 0, 0]
+    row_3 = [0, 0, 0, 0, 0]
+    row_4 = [0, 0, 0, 0, 0]
+    row_5 = [0, 0, 0, 0, 0]
+    map = [row_0, row_1, row_2, row_3, row_4, row_5]
+    return map
+
+def create_word_list():
+    word_list = []
+    for line in open('word_list.txt'):
+        line = line.strip()
+        word_list.append(line)
+    word_list.remove('')    #remove null from the word list
+    return word_list
+
+def check_word_list(user_input, word_list):
+    while True: 
+        if user_input in word_list:
+            break
+        else:
+            user_input = str(input("Your guess is not in the word list, please take another guess:"))
+    return user_input
+        
+if __name__ == '__main__':
+    main()
